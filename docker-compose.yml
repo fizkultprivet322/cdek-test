@@ -1,0 +1,28 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sre-trainee-web
+    ports:
+      - "8000:8000"
+    restart: always
+    networks:
+      - appnet
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'python -c "import urllib.request; urllib.request.urlopen(''http://localhost:8000/'', timeout=5)"',
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  appnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.220.1.0/24
