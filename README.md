@@ -6,30 +6,45 @@
 - .github/workflows/ci.yml - CI для main: build, run, проверки curl, остановка контейнера.
 - autoheal.sh - фоновая проверка доступности каждые 30 секунд, рестарт через docker compose restart и логирование в autoheal.log.
 
-## Локальный запуск
-
+# Результаты локальной проверки
+- Поднятие сервиса:
 ```bash
 docker compose up -d --build
-curl http://localhost:8000/
-curl http://localhost:8000/metrics
 ```
-
-## Самопроверка из задания
-
+- Проверка корневого эндпоинта:
 ```bash
-docker compose up -d
-curl http://localhost:8000/metrics
+curl http://127.0.0.1:8000/
+```
+```text
+OK
+```
+- Проверка метрик:
+```bash
+curl http://127.0.0.1:8000/metrics
+```
+```text
+# HELP http_requests_total Total requests
+# TYPE http_requests_total counter
+http_requests_total 2
+# HELP http_errors_total Total errors
+# TYPE http_errors_total counter
+http_errors_total 0
+```
+- Имитация падения контейнера:
+```bash
 docker kill sre-trainee-web
 sleep 40
-curl http://localhost:8000/
+curl http://127.0.0.1:8000/
+```
+```text
+OK
+```
+- Проверка лога autoheal:
+```bash
 cat autoheal.log
 ```
-
-Для запуска autoheal в отдельной сессии:
-
-```bash
-chmod +x autoheal.sh
-./autoheal.sh
+```text
+2026-04-13T20:09:41Z service unavailable; running docker compose restart
 ```
 
 ## Ответы на вопросы
@@ -89,3 +104,7 @@ Workflow запускается при каждом push в main и выполн
 3. curl http://localhost:8000/ (ожидается OK)
 4. curl http://localhost:8000/metrics (проверка наличия обеих метрик)
 5. остановка контейнера
+
+```text
+https://github.com/fizkultprivet322/cdek-test/actions/runs/24365281210/job/71155272994
+```
